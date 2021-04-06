@@ -1,0 +1,34 @@
+function sysCall_init() 
+    body=sim.getObjectHandle('Cylinder')
+    bodyS=sim.getObjectHandle('Cylinder')
+    mass=1.1
+    str=-20
+end
+
+
+function sysCall_cleanup() 
+ 
+end 
+
+function sysCall_actuation() 
+    p=sim.getObjectPosition(bodyS,-1)
+    cm=(0.05-p[3])/0.05
+    
+    if (cm>1.05) then cm=1.05 end
+    if (cm<0) then cm=0 end
+    
+    sim.addForceAndTorque(body,{0,0,9.81*cm})
+    linV,angV=sim.getVelocity(body)
+    m=sim.getObjectMatrix(bodyS,-1)
+    m[4]=0
+    m[8]=0
+    m[12]=0
+    mi=simGetInvertedMatrix(m)
+    linV=sim.multiplyVector(mi,linV)
+    linV[1]=0
+    linV=sim.multiplyVector(m,linV)
+    f={linV[1]*mass*str*cm,linV[2]*mass*str*cm,linV[3]*mass*str*cm}
+    sim.addForceAndTorque(body,f)
+  
+end 
+
