@@ -61,7 +61,6 @@ function getImu(objectName)
    o=sim.getObjectQuaternion(objectHandle,relTo)
    linVel,angVel=sim.getVelocity(objectHandle)
    
-   
    return {
       orientation={x=o[1],y=o[2],z=o[3],w=o[4],
       orientation_covariance={0,0,0,0,0,0,0,0,0},
@@ -122,8 +121,8 @@ function sysCall_actuation()
    -- and send the angle of the central axis
    if rosInterfacePresent then
       simROS.publish(GPS,data=getGPS("CentralAxis"))
-      simROS.publish(Compass,data=getMagField("CentralAxis")
-      simROS.publish(IMU,data=getImu("CentralAxis")
+      simROS.publish(Compass,data=getMagField("CentralAxis"))
+      simROS.publish(IMU,data=getImu("CentralAxis"))
       
       -- send a TF  :  robot w.r.t. floor
       simROS.sendTransform(getTransformStamped(objectHandle,objectName,referenceHandle,referenceName))
