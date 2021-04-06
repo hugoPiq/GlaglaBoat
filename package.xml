@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>dimr_kuka</name>
+  <name>ddboat</name>
   <version>0.0.1</version>
-  <description>The dimr-kuka package</description>
+  <description>The ddboat package</description>
 
   <maintainer email="estelle.arricau@ensta-bretagne.org">Estelle Arricau</maintainer>
 
