@@ -25,4 +25,6 @@ function subscriber_boat_state_callback(msg)
    e = ke*(hd-hd_obj)
    u_left = 0.5*spd_obj*(1+kp*e)
    u_right = 0.5*spd_obj*(1-kp*e)
+   sim.setJointTargetVelocity(leftMotor,u_left)
+   sim.setJointTargetVelocity(rightMotor,u_right)
 
