@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <node pkg="ddboat" type="talker.py" output="screen" name="chatter" cwd="node"/>
+    <node pkg="ddboat" type="listener.py" output="screen" name="listener" cwd="node"/>
+</launch>
