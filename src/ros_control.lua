@@ -51,7 +51,7 @@ function getMagField(objectName)
    -- /!\ Conversion orientation vers donnees boussole
    return {
       magnetic_field={x=0, y=0, z=0},
-      magnetic_covariance={0, 0, 0, 0, 0, 0, 0, 0, 0}
+      magnetic_field_covariance={0, 0, 0, 0, 0, 0, 0, 0, 0}
    }
 end
 
@@ -62,7 +62,7 @@ function getImu(objectName)
    linVel,angVel=sim.getVelocity(objectHandle)
    
    return {
-      orientation={x=o[1],y=o[2],z=o[3],w=o[4],
+      orientation={x=o[1],y=o[2],z=o[3],w=o[4]},
       orientation_covariance={0,0,0,0,0,0,0,0,0},
       angular_velocity={x=angVel[1],y=angVel[2],z=angVel[3]},
       angular_velocity_covariance={0,0,0,0,0,0,0,0,0},
@@ -93,16 +93,16 @@ end
 function sysCall_init()
    -- The child script initialization
    print ("init")
-   objectName="CentralAxis"
+   objectName="DDBoat_3D"
    objectHandle=sim.getObjectHandle(objectName)
-   referenceName="ResizableFloor_5_25"
-   referenceHandle=sim.getObjectHandle(referenceName)
+   --referenceName="ResizableFloor_5_25"
+   --referenceHandle=sim.getObjectHandle(referenceName)
    -- get left and right motors handles
-   leftFrontMotor = sim.getObjectHandle("MotorFrontLeft")
-   rightFrontMotor = sim.getObjectHandle("MotorFrontRight")
-   leftRearMotor = sim.getObjectHandle("MotorRearLeft")
-   rightRearMotor = sim.getObjectHandle("MotorRearRight")
-   centralAxis = sim.getObjectHandle("CentralAxis")
+   --leftFrontMotor = sim.getObjectHandle("MotorFrontLeft")
+   --rightFrontMotor = sim.getObjectHandle("MotorFrontRight")
+   --leftRearMotor = sim.getObjectHandle("MotorRearLeft")
+   --rightRearMotor = sim.getObjectHandle("MotorRearRight")
+   --centralAxis = sim.getObjectHandle("CentralAxis")
    rosInterfacePresent=simROS
    -- Prepare the publishers and subscribers :
    if rosInterfacePresent then
@@ -120,12 +120,12 @@ function sysCall_actuation()
    -- Send an updated simulation time message, send the transform of the central axis
    -- and send the angle of the central axis
    if rosInterfacePresent then
-      simROS.publish(GPS,data=getGPS("CentralAxis"))
-      simROS.publish(Compass,data=getMagField("CentralAxis"))
-      simROS.publish(IMU,data=getImu("CentralAxis"))
+      simROS.publish(GPS,getGPS("DDBoat_3D"))
+      simROS.publish(Compass,getMagField("DDBoat_3D"))
+      simROS.publish(IMU,getImu("DDBoat_3D"))
       
       -- send a TF  :  robot w.r.t. floor
-      simROS.sendTransform(getTransformStamped(objectHandle,objectName,referenceHandle,referenceName))
+      --simROS.sendTransform(getTransformStamped(objectHandle,objectName,referenceHandle,referenceName))
       -- To send several transforms at once, use simROS.sendTransforms instead
    end
 end
@@ -134,9 +134,12 @@ function sysCall_cleanup()
    -- Following not really needed in a simulation script (i.e. automatically shut down
    -- at simulation end):
     if rosInterfacePresent then
-        simROS.shutdownPublisher(publisher1)
-        simROS.shutdownPublisher(publisher2)
-        simROS.shutdownPublisher(publisher3)
-        simROS.shutdownSubscriber(subscriber1)
+        simROS.shutdownPublisher(GPS)
+        simROS.shutdownPublisher(Camera)
+        simROS.shutdownPublisher(Compass)
+        simROS.shutdownPublisher(IMU)
+        simROS.shutdownPublisher(EncoderLeft)
+        simROS.shutdownPublisher(EncoderRight)
+        --simROS.shutdownSubscriber(subscriber1)
     end
 end
