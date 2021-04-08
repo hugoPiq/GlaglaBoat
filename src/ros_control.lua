@@ -22,6 +22,12 @@ function subscriber_cmd_vel_callback(msg)
     sim.addStatusbarMessage('cmd_vel subscriber receiver : spdLin ='..spdLin..',spdAng='..spdAng.." command : spdLeft="..spdLeft..",act="..spdRight)
 end
 
+function subscriber_cmd_motor_callback(msg)
+   spdLeft = msg[0]
+   spdRight = msg[1]
+   print(spdLeft, spdRight)
+end
+
 function getPose(objectName)
    -- This function get the object pose at ROS format geometry_msgs/Pose
    objectHandle=sim.getObjectHandle(objectName)
@@ -38,8 +44,14 @@ function getGPS(objectName)
    objectHandle=sim.getObjectHandle(objectName)
    relTo=-1
    p=sim.getObjectPosition(objectHandle,relTo)
+   rho = 6371000
+   lx_ref = 48.199180
+   ly_ref = -3.015480
+   ly = p[2]/rho + ly_ref
+   lx = p[1]/(rho*math.cos(ly)) + lx_ref
+   lz = rho + p[3]
    return {
-      latitude=p[1], longitude=p[2], altitude=p[3],
+      latitude=ly, longitude=lx, altitude=lz,
       position_covariance={0, 0, 0, 0, 0, 0, 0, 0, 0}
    }
 end
@@ -113,6 +125,7 @@ function sysCall_init()
       EncoderLeft=simROS.advertise('/RotSpeedLeft', 'std_msgs/Float64')
       EncoderRight=simROS.advertise('/RotSpeedRight', 'std_msgs/Float64')
       --subscriber1=simROS.subscribe('/cmd_vel','geometry_msgs/Twist','subscriber_cmd_vel_callback')
+      Motors=simROS.subscribe('/MotorsCommand', 'std_msgs/MultiArrayLayout', 'subscriber_cmd_motor_callback')
    end
 end
 
