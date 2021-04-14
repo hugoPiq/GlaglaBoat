@@ -19,7 +19,7 @@ function subscriber_cmd_vel_callback(msg)
    sim.setJointTargetVelocity(rightFrontMotor,spdRight)
    sim.setJointTargetVelocity(leftRearMotor,spdLeft)
    sim.setJointTargetVelocity(rightRearMotor,spdRight)
-    sim.addStatusbarMessage('cmd_vel subscriber receiver : spdLin ='..spdLin..',spdAng='..spdAng.." command : spdLeft="..spdLeft..",act="..spdRight)
+   sim.addStatusbarMessage('cmd_vel subscriber receiver : spdLin ='..spdLin..',spdAng='..spdAng.." command : spdLeft="..spdLeft..",act="..spdRight)
 end
 
 function getPose(objectName)
@@ -44,13 +44,26 @@ function getGPS(objectName)
    }
 end
 
-function getMagField(objectName)
+function getMagField(objectHandle,objectName,referenceHandle,referenceName)
+   -- champ magnétique sur z (vers le haut) dans le frame World : -4600 µT
+   B = -4600
    objectHandle=sim.getObjectHandle(objectName)
    relTo=-1
    o=sim.getObjectQuaternion(objectHandle,relTo)
+   tf = getTransformStamped(objectHandle,objectName,referenceHandle,referenceName)
+   -- get the quaternion to change from frame World to frame DD_Boat3D
+   q0 = tf["transform"]["rotation"]["x"]
+   q1 = tf["transform"]["rotation"]["y"]
+   q2 = tf["transform"]["rotation"]["z"]
+   q3 = tf["transform"]["rotation"]["w"]
+   print("bonjour")
+   --third row of the rotation matrix
+   r20 = 2 * (q1 * q3 - q0 * q2)
+   r21 = 2 * (q2 * q3 + q0 * q1)
+   r22 = 2 * (q0 * q0 + q3 * q3) - 1
    -- /!\ Conversion orientation vers donnees boussole
    return {
-      magnetic_field={x=0, y=0, z=0},
+      magnetic_field={x=B*r20, y=B*r21, z=B*r22},
       magnetic_field_covariance={0, 0, 0, 0, 0, 0, 0, 0, 0}
    }
 end
@@ -95,7 +108,7 @@ function sysCall_init()
    print ("init")
    objectName="DDBoat_3D"
    objectHandle=sim.getObjectHandle(objectName)
-   referenceName="ResizableFloor_5_25"
+   referenceName="Plane"
    referenceHandle=sim.getObjectHandle(referenceName)
    -- get left and right motors handles
    --leftFrontMotor = sim.getObjectHandle("MotorFrontLeft")
@@ -112,17 +125,22 @@ function sysCall_init()
       IMU=simROS.advertise('/GyroAccelero', 'sensor_msgs/Imu')
       EncoderLeft=simROS.advertise('/RotSpeedLeft', 'std_msgs/Float64')
       EncoderRight=simROS.advertise('/RotSpeedRight', 'std_msgs/Float64')
-      --subscriber1=simROS.subscribe('/cmd_vel','geometry_msgs/Twist','subscriber_cmd_vel_callback')
+      subscriber1=simROS.subscribe('/cmd_vel','geometry_msgs/Twist','subscriber_cmd_vel_callback')
    end
 end
 
 function sysCall_actuation()
    -- Send an updated simulation time message, send the transform of the central axis
    -- and send the angle of the central axis
+   print("hello")
+   objectName="DDBoat_3D"
+   objectHandle=sim.getObjectHandle(objectName)
+   referenceName="Plane"
+   referenceHandle=sim.getObjectHandle(referenceName)
    if rosInterfacePresent then
-      simROS.publish(GPS,getGPS("DDBoat_3D"))
-      simROS.publish(Compass,getMagField("DDBoat_3D"))
-      simROS.publish(IMU,getImu("DDBoat_3D"))
+      simROS.publish(GPS,getGPS(objectName))
+      simROS.publish(Compass,getMagField(objectHandle,objectName,referenceHandle,referenceName))
+      simROS.publish(IMU,getImu(objectName))
       
       -- send a TF  :  robot w.r.t. floor
       simROS.sendTransform(getTransformStamped(objectHandle,objectName,referenceHandle,referenceName))
