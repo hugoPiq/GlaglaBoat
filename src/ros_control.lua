@@ -95,8 +95,8 @@ function sysCall_init()
    print ("init")
    objectName="DDBoat_3D"
    objectHandle=sim.getObjectHandle(objectName)
-   --referenceName="ResizableFloor_5_25"
-   --referenceHandle=sim.getObjectHandle(referenceName)
+   referenceName="ResizableFloor_5_25"
+   referenceHandle=sim.getObjectHandle(referenceName)
    -- get left and right motors handles
    --leftFrontMotor = sim.getObjectHandle("MotorFrontLeft")
    --rightFrontMotor = sim.getObjectHandle("MotorFrontRight")
@@ -125,7 +125,7 @@ function sysCall_actuation()
       simROS.publish(IMU,getImu("DDBoat_3D"))
       
       -- send a TF  :  robot w.r.t. floor
-      --simROS.sendTransform(getTransformStamped(objectHandle,objectName,referenceHandle,referenceName))
+      simROS.sendTransform(getTransformStamped(objectHandle,objectName,referenceHandle,referenceName))
       -- To send several transforms at once, use simROS.sendTransforms instead
    end
 end
