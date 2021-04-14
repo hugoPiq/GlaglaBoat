@@ -95,7 +95,7 @@ function sysCall_init()
    print ("init")
    objectName="DDBoat_3D"
    objectHandle=sim.getObjectHandle(objectName)
-   referenceName="ResizableFloor_5_25"
+   referenceName="Plane"
    referenceHandle=sim.getObjectHandle(referenceName)
    -- get left and right motors handles
    --leftFrontMotor = sim.getObjectHandle("MotorFrontLeft")
