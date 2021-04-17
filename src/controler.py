@@ -12,7 +12,7 @@ import std_msgs
 HEADING = 0
 
 
-def control(heading_bar = 0, v_bar = 120):
+def control(heading_bar = np.pi/4, v_bar = 200):
     global HEADING
     rospy.init_node('controler', anonymous=True)
     pub = rospy.Publisher('/cmd_vel', std_msgs.msg.Float64MultiArray, queue_size=10)
@@ -25,10 +25,11 @@ def control(heading_bar = 0, v_bar = 120):
         m = std_msgs.msg.Float64MultiArray()
         
         e = sawtooth(HEADING - heading_bar)
-        print(HEADING)
+        print("HEADING : ", HEADING)
+        print("e : ", e)
         
-        u1 = int(0.5*v_bar*(1 + K*e))
-        u2 = int(0.5*v_bar*(1 - K*e))
+        u1 = int(0.5*v_bar*(1 - K*e))
+        u2 = int(0.5*v_bar*(1 + K*e))
         
         m.data = [float(u1), float(u2)]
         
@@ -37,7 +38,7 @@ def control(heading_bar = 0, v_bar = 120):
 
 
 def sawtooth(x):
-    return (x+2*np.pi) % (2*np.pi)-np.pi
+    return (x+np.pi) % (2*np.pi)-np.pi
 
 
 def callback(data):

@@ -10,14 +10,14 @@ function subscriber_cmd_vel_callback(msg)
    -- spdLeft = kLin*spdLin+kAng*spdAng
    -- spdRight = kLin*spdLin-kAng*spdAng
    -- sim.addStatusbarMessage('cmd_vel subscriber receiver : spdLin ='..spdLin..',spdAng='..spdAng.." command : spdLeft="..spdLeft..",act="..spdRight)
-   spdLeft = abs(msg["data"][1])
-   spdRight = abs(msg["data"][2])
+   spdLeft = msg["data"][1]
+   spdRight = msg["data"][2]
 
    if spdRight > 255 then spdRight = 255 end
    if spdLeft > 255 then spdLeft = 255 end
 
-   spdRight = 0.25*(255-spdRight)/255
-   spdLeft = 0.25*(255-spdLeft)/255
+   spdRight = 0.3*spdRight/255
+   spdLeft = 0.3*spdLeft/255
    
    objectHandle=sim.getObjectHandle("DynamiqueBoat")
    sim.addForceAndTorque(objectHandle, {spdLeft+spdRight, 0, 0}, {0, 0, spdRight-spdLeft})
