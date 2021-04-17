@@ -1,13 +1,17 @@
 
 
-# Titre du projet
+
+# Simulation des robots mobiles
 _(juste en dessous des badges sympatiques à placer)_
 
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)  [![forthebadge](http://forthebadge.com/images/badges/powered-by-electricity.svg)](http://forthebadge.com)
+Simulation DDBoat dynamique sur VREP.
 
-Une petite description du projet
+Simulation DDBoat dynamique sur VREP.
+Participants: Estelle Arricau, Antonin Betaille, Jean-Vincent Klein, Nicolas Odorico, Hugo Piquard.
+Date: Avril 2021
 
-## Pour commencer
+##
 
 Entrez ici les instructions pour bien débuter avec votre projet...
 
@@ -69,7 +73,3 @@ Ce projet est sous licence ``exemple: WTFTPL`` - voir le fichier [LICENSE.md](LI
 
 
 
-# Simulation des robots mobiles
-#Simulation DDBoat dynamique sur VREP.
-#Participants: Estelle Arricau, Antonin Betaille, Jean-Vincent Klein, Nicolas Odorico, Hugo Piquard.
-#Date: Avril 2021
