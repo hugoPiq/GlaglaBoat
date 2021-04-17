@@ -4,8 +4,7 @@
 # Simulation des robots mobiles ENSTA Bretagne
 
 
-[![forthebadge](https://forthebadge.com/images/badges/for-robots.svg)](http://forthebadge.com)
-
+<img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge&logo=lua&logoColor=white" /> 
 
 Simulation DDBoat dynamique sur VREP.
 
