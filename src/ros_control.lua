@@ -10,11 +10,11 @@ function subscriber_cmd_vel_callback(msg)
    -- spdLeft = kLin*spdLin+kAng*spdAng
    -- spdRight = kLin*spdLin-kAng*spdAng
    -- sim.addStatusbarMessage('cmd_vel subscriber receiver : spdLin ='..spdLin..',spdAng='..spdAng.." command : spdLeft="..spdLeft..",act="..spdRight)
-   spdLeft = msg["data"][1]*10.0
-   spdRight = msg["data"][2]*10.0
+   spdLeft = msg["data"][1]
+   spdRight = msg["data"][2]
    
    objectHandle=sim.getObjectHandle("DynamiqueBoat")
-   sim.addForceAndTorque(objectHandle, {spdLeft+spdRight, 0, 0}, {0, 0, spdLeft-spdRight})
+   sim.addForceAndTorque(objectHandle, {spdLeft+spdRight, 0, 0}, {0, 0, spdRight-spdLeft})
    
    --sim.setJointTargetVelocity(rightMotor,spdRight)
 
@@ -54,7 +54,6 @@ function getMagField(objectHandle,objectName,referenceHandle,referenceName)
    q1 = tf["transform"]["rotation"]["y"]
    q2 = tf["transform"]["rotation"]["z"]
    q3 = tf["transform"]["rotation"]["w"]
-   print("bonjour")
    --third row of the rotation matrix
    r20 = 2 * (q1 * q3 - q0 * q2)
    r21 = 2 * (q2 * q3 + q0 * q1)
@@ -102,9 +101,17 @@ function getTransformStamped(objHandle,name,relTo,relToName)
 end
 
 function sysCall_init()
+    ---Original script
+    body=sim.getObjectHandle('DynamiqueBoat')
+    eau=sim.getObjectHandle('Plane')
+    mass=0.3
+    str=-20
+    frot = 0
+
+
    -- The child script initialization
    print ("init")
-   objectName="DDBoat_3D"
+   objectName="DynamiqueBoat"
    objectHandle=sim.getObjectHandle(objectName)
    referenceName="Plane"
    referenceHandle=sim.getObjectHandle(referenceName)
@@ -129,13 +136,43 @@ function sysCall_init()
 end
 
 function sysCall_actuation()
+    ---Original script
+    p=sim.getObjectPosition(body,-1)
+    cm=(0.01-p[3])/0.01
+    
+    if (cm>0.6) then cm=0.6 end
+    if (cm<0) then cm=0 end
+    
+    linV,angV=sim.getVelocity(body)
+
+    frot=-10*linV[3]
+    
+    frot_roulis = -0.1*angV[1]
+    frot_tangage = -0.05*angV[2]
+    frot_cap = -0.1*angV[3]
+    
+    m=sim.getObjectMatrix(body,-1)
+    m[4]=0
+    m[8]=0
+    m[12]=0
+    mi=simGetInvertedMatrix(m)
+    linV=sim.multiplyVector(mi,linV)
+    linV[1]=0
+    linV=sim.multiplyVector(m,linV)
+    
+    euler = sim.getObjectOrientation(body,-1)
+    
+    --f={linV[1]*mass*str*cm + 0.1,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
+    f={linV[1]*mass*str*cm,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
+    --f={0.1,0.1,linV[1]*mass*str*cm + 9.81*cm + frot}
+    T ={-0.1*math.sin(euler[1]) + frot_roulis,-0.1*math.sin(euler[2]) +frot_tangage,-0.1*math.sin(euler[3]) + frot_cap} 
+    sim.addForceAndTorque(body,f,T)
+
+
+
+
    -- Send an updated simulation time message, send the transform of the central axis
    -- and send the angle of the central axis
-   print("hello")
-   objectName="DDBoat_3D"
-   objectHandle=sim.getObjectHandle(objectName)
-   referenceName="Plane"
-   referenceHandle=sim.getObjectHandle(referenceName)
    if rosInterfacePresent then
       simROS.publish(GPS,getGPS(objectName))
       simROS.publish(Compass,getMagField(objectHandle,objectName,referenceHandle,referenceName))
