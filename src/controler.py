@@ -5,50 +5,59 @@ import sys
 import numpy as np
 import copy
 
-import geometry_msgs.msg
-from geometry_msgs.msg import Pose, PoseStamped
+#import geometry_msgs.msg
+#from geometry_msgs.msg import Pose, PoseStamped
 
-from math import pi
-from std_msgs.msg import String
+#from math import pi
+#from std_msgs.msg import String
+import std_msgs
+import sensor_msgs
+import std_msgs
 
+#from sensor_msgs.msg import MagneticField
 
-
-def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-
-
-def listener():
-
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
-
-    rospy.Subscriber('chatter', String, callback)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
-
-
-
+HEADING = 0
 
 
 def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
+    pub = rospy.Publisher('/cmd_vel', std_msgs.msg.Float64MultiArray, queue_size=10)
+    rospy.Subscriber('/MagField', sensor_msgs.msg.MagneticField, callback)
+    rospy.init_node('controler', anonymous=True)
     rate = rospy.Rate(10)  # 10hz
+    
+    heading_bar = 0
+    vmax = 80
+    vmin = 40
+    K = 1.15
+    
     while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
+        m = std_msgs.msg.Float64MultiArray()
+        
+        e = sawtooth(HEADING - heading_bar)
+        v = ((abs(e)*(vmax - vmin)) / np.pi) + vmin
+        
+        u1 = int(0.5*v*(1 + K*e))
+        u2 = int(0.5*v*(1 - K*e))
+        
+        m.data = [float(u1), float(u2)]
+        
+        pub.publish(m)
         rate.sleep()
+
+
+def sawtooth(x):
+    return (x+2*np.pi) % (2*np.pi)-np.pi
+
+
+def callback(data):
+    mag_field = data.magnetic_field
+    HEADING = np.arctan2(mag_field.y, mag_field.x)
+
 
 
 if __name__ == "__main__":
     try:
         talker()
-     except rospy.ROSInterruptException:
+    except rospy.ROSInterruptException:
         pass
 
