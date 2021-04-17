@@ -24,6 +24,8 @@ VREP Version 3.6.2
 
 ROS Noetic (remarque: la version Melodic fonctionne également).
 
+Python Version 3 minimum.
+
 #### Installation
 
 - Cloner le dépot.
@@ -32,18 +34,12 @@ ROS Noetic (remarque: la version Melodic fonctionne également).
 - Lancer ROSCORE en premier:
 _exemple_: Executez la commande ``roscore`` .
 - Lancer VREP puis ouvrir la scène ``real_boat.ttt``.
-- Lancer RQT.
-_exemple_: Executez la commande ``rqt`` .
+- Lancer ``controler.py`` .
+- Lancer la simulation sur VRP.
 
-#### Utilisation
-##### Commande
-- Sur RQT:
-_exemple_: Executez la commande ``roscore`` .
-<img src="https://github.com/hugoPiq/GlaglaBoat/blob/main/doc/rqt_cmd_tourbillon_left.png" />
-<img src="https://github.com/hugoPiq/GlaglaBoat/blob/main/doc/rqt_cmd_go_straight.png" />
+#### Commande
+Le fichier ``controler.py`` est un exemple de controleur proportionnel suivie de cap.
 
-##### Détails
--
 
 
 
