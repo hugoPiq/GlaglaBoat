@@ -5,50 +5,49 @@ import sys
 import numpy as np
 import copy
 
-import geometry_msgs.msg
-from geometry_msgs.msg import Pose, PoseStamped
+import std_msgs
+import sensor_msgs
+import std_msgs
 
-from math import pi
-from std_msgs.msg import String
+HEADING = 0
 
+
+def control(heading_bar = 0, v_bar = 120):
+    global HEADING
+    rospy.init_node('controler', anonymous=True)
+    pub = rospy.Publisher('/cmd_vel', std_msgs.msg.Float64MultiArray, queue_size=10)
+    rospy.Subscriber('/MagField', sensor_msgs.msg.MagneticField, callback)
+    rate = rospy.Rate(10)  # 10hz
+    
+    K = 1.15
+    
+    while not rospy.is_shutdown():
+        m = std_msgs.msg.Float64MultiArray()
+        
+        e = sawtooth(HEADING - heading_bar)
+        
+        u1 = int(0.5*v_bar*(1 + K*e))
+        u2 = int(0.5*v_bar*(1 - K*e))
+        
+        m.data = [float(u1), float(u2)]
+        
+        pub.publish(m)
+        rate.sleep()
+
+
+def sawtooth(x):
+    return (x+2*np.pi) % (2*np.pi)-np.pi
 
 
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-
-
-def listener():
-
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
-
-    rospy.Subscriber('chatter', String, callback)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
-
-
-
-
-
-def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
-    rate = rospy.Rate(10)  # 10hz
-    while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
-        rate.sleep()
+    global HEADING
+    mag_field = data.magnetic_field
+    HEADING = np.arctan2(mag_field.y, mag_field.x)
 
 
 if __name__ == "__main__":
     try:
-        talker()
-     except rospy.ROSInterruptException:
+        control()
+    except rospy.ROSInterruptException:
         pass
 
