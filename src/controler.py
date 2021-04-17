@@ -19,12 +19,13 @@ def control(heading_bar = 0, v_bar = 120):
     rospy.Subscriber('/MagField', sensor_msgs.msg.MagneticField, callback)
     rate = rospy.Rate(10)  # 10hz
     
-    K = 1.15
+    K = 1/np.pi
     
     while not rospy.is_shutdown():
         m = std_msgs.msg.Float64MultiArray()
         
         e = sawtooth(HEADING - heading_bar)
+        print(HEADING)
         
         u1 = int(0.5*v_bar*(1 + K*e))
         u2 = int(0.5*v_bar*(1 - K*e))
