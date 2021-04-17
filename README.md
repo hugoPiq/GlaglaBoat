@@ -20,8 +20,9 @@ Simulation DDBoat dynamique sur VREP.
 * **Benoit Zerr**
 
 #### Pré-requis
-VREP
-ROS
+VREP Version 3.6.2
+
+ROS Noetic (remarque: la version Melodic fonctionne également).
 
 #### Installation
 
@@ -34,9 +35,15 @@ _exemple_: Executez la commande ``roscore`` .
 - Lancer RQT.
 _exemple_: Executez la commande ``rqt`` .
 
-#### Démarrage
+#### Utilisation
+##### Commande
 - Sur RQT:
+_exemple_: Executez la commande ``roscore`` .
+<img src="https://github.com/hugoPiq/GlaglaBoat/blob/main/doc/rqt_cmd_tourbillon_left.png" />
+<img src="https://github.com/hugoPiq/GlaglaBoat/blob/main/doc/rqt_cmd_go_straight.png" />
 
+##### Détails
+-
 
 
 
