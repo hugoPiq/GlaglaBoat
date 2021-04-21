@@ -20,7 +20,7 @@ function subscriber_cmd_vel_callback(msg)
    
    objectHandle=sim.getObjectHandle("DynamiqueBoat")
    sim.addForceAndTorque(objectHandle, {-spdLeft-spdRight, 0, 0}, {0, 0, spdRight-spdLeft})
-   sim.addStatusbarMessage(" command : spdLeft="..spdLeft..",act="..spdRight)
+   --sim.addStatusbarMessage(" command : spdLeft="..spdLeft..",act="..spdRight)
    
    --sim.setJointTargetVelocity(rightMotor,spdRight)
 
@@ -29,7 +29,7 @@ end
 function subscriber_cmd_motor_callback(msg)
    spdLeft = msg[0]
    spdRight = msg[1]
-   print(spdLeft, spdRight)
+   --print(spdLeft, spdRight)
 end
 
 function getGPS(objectName)
@@ -158,9 +158,12 @@ function sysCall_actuation()
     if (cm<0) then cm=0 end
     
     linV,angV=sim.getVelocity(body)
-
+    print(linV)
     frot=-10*linV[3]
-    frot_x=-10*linV[1]
+    frot_x = 0
+    if(math.abs(linV[1])>1.5) then
+        frot_x=-5*linV[1]
+    end
     print(linV)
     
     frot_roulis = -0.1*angV[1]
@@ -179,7 +182,7 @@ function sysCall_actuation()
     euler = sim.getObjectOrientation(body,-1)
     
     --f={linV[1]*mass*str*cm + 0.1,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
-    f={linV[1]*mass*str*cm,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
+    f={linV[1]*mass*str*cm+frot_x,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
     --f={0.1,0.1,linV[1]*mass*str*cm + 9.81*cm + frot}
     T ={-0.1*math.sin(euler[1]) + frot_roulis,-0.1*math.sin(euler[2]) +frot_tangage,-0*0.1*math.sin(euler[3]) + frot_cap} 
     sim.addForceAndTorque(body,f,T)
