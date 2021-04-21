@@ -9,7 +9,6 @@ function subscriber_cmd_vel_callback(msg)
    -- kAng = -0.2
    -- spdLeft = kLin*spdLin+kAng*spdAng
    -- spdRight = kLin*spdLin-kAng*spdAng
-   -- sim.addStatusbarMessage('cmd_vel subscriber receiver : spdLin ='..spdLin..',spdAng='..spdAng.." command : spdLeft="..spdLeft..",act="..spdRight)
    spdLeft = msg["data"][1]
    spdRight = msg["data"][2]
 
@@ -20,7 +19,8 @@ function subscriber_cmd_vel_callback(msg)
    spdLeft = 0.3*spdLeft/255
    
    objectHandle=sim.getObjectHandle("DynamiqueBoat")
-   sim.addForceAndTorque(objectHandle, {spdLeft+spdRight, 0, 0}, {0, 0, spdRight-spdLeft})
+   sim.addForceAndTorque(objectHandle, {-spdLeft-spdRight, 0, 0}, {0, 0, spdRight-spdLeft})
+   sim.addStatusbarMessage(" command : spdLeft="..spdLeft..",act="..spdRight)
    
    --sim.setJointTargetVelocity(rightMotor,spdRight)
 
@@ -68,6 +68,13 @@ function getMagField(objectHandle,objectName,referenceHandle,referenceName)
    return {
       magnetic_field={x=B*r20, y=B*r21, z=B*r22},
       magnetic_field_covariance={0, 0, 0, 0, 0, 0, 0, 0, 0}
+   }
+end
+
+function getCompass(objectHandle,objectName,referenceHandle,referenceName)
+   magField = getMagField(objectHandle,objectName,referenceHandle,referenceName)
+   return {
+      data = {magField.magnetic_field.z, magField.magnetic_field.y}
    }
 end
 
@@ -133,6 +140,7 @@ function sysCall_init()
       GPS=simROS.advertise('/Position','sensor_msgs/NavSatFix')
       Camera=simROS.advertise('/Image', 'sensor_msgs/Image')
       Compass=simROS.advertise('/MagField', 'sensor_msgs/MagneticField')
+      Compass2=simROS.advertise('/Compass', 'std_msgs/Float64MultiArray')
       IMU=simROS.advertise('/GyroAccelero', 'sensor_msgs/Imu')
       Motors=simROS.subscribe('/cmd_vel','std_msgs/Float64MultiArray','subscriber_cmd_vel_callback')
       --EncoderLeft=simROS.advertise('/RotSpeedLeft', 'std_msgs/Float64')
@@ -152,6 +160,8 @@ function sysCall_actuation()
     linV,angV=sim.getVelocity(body)
 
     frot=-10*linV[3]
+    frot_x=-10*linV[1]
+    print(linV)
     
     frot_roulis = -0.1*angV[1]
     frot_tangage = -0.05*angV[2]
@@ -171,7 +181,7 @@ function sysCall_actuation()
     --f={linV[1]*mass*str*cm + 0.1,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
     f={linV[1]*mass*str*cm,linV[2]*mass*str*cm,linV[3]*mass*str*cm + 9.81*cm + frot}
     --f={0.1,0.1,linV[1]*mass*str*cm + 9.81*cm + frot}
-    T ={-0.1*math.sin(euler[1]) + frot_roulis,-0.1*math.sin(euler[2]) +frot_tangage,-0.1*math.sin(euler[3]) + frot_cap} 
+    T ={-0.1*math.sin(euler[1]) + frot_roulis,-0.1*math.sin(euler[2]) +frot_tangage,-0*0.1*math.sin(euler[3]) + frot_cap} 
     sim.addForceAndTorque(body,f,T)
 
 
@@ -182,6 +192,7 @@ function sysCall_actuation()
    if rosInterfacePresent then
       simROS.publish(GPS,getGPS(objectName))
       simROS.publish(Compass,getMagField(objectHandle,objectName,referenceHandle,referenceName))
+      simROS.publish(Compass2,getCompass(objectHandle,objectName,referenceHandle,referenceName))
       simROS.publish(IMU,getImu(objectName))
       
       -- send a TF  :  robot w.r.t. floor
@@ -197,6 +208,7 @@ function sysCall_cleanup()
         simROS.shutdownPublisher(GPS)
         simROS.shutdownPublisher(Camera)
         simROS.shutdownPublisher(Compass)
+        simROS.shutdownPublisher(Compass2)
         simROS.shutdownPublisher(IMU)
         
         simROS.shutdownSubscriber(Motors)
