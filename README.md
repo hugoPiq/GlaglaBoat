@@ -38,7 +38,7 @@ _exemple_: Executez la commande ``roscore`` .
 - Lancer la simulation sur VRP.
 
 #### Commande
-Le fichier ``controler.py`` est un exemple de controleur proportionnel suivie de cap.
+Le fichier ``controler.py`` est un exemple de controleur proportionnel suivie de cap. Dans cet exemple, le cap suivi est de -PI/4.
 
 
 
